@@ -1,0 +1,139 @@
+// ============================================================
+// Mesures DAX - Dashboard KPI E-Commerce
+// Copiez ces mesures dans Power BI Desktop
+// ============================================================
+
+
+// ── CHIFFRE D'AFFAIRES ────────────────────────────────────────
+
+CA Total =
+CALCULATE(
+    SUM(fact_sales[total_amount]),
+    fact_sales[is_cancelled] = FALSE
+)
+
+CA Mois Courant =
+CALCULATE(
+    [CA Total],
+    DATESMTD(dim_date[date_id])
+)
+
+CA Mois Précédent =
+CALCULATE(
+    [CA Total],
+    PREVIOUSMONTH(dim_date[date_id])
+)
+
+Evolution MoM % =
+VAR caActuel = [CA Mois Courant]
+VAR caPrecedent = [CA Mois Précédent]
+RETURN
+    IF(
+        caPrecedent <> 0,
+        DIVIDE(caActuel - caPrecedent, caPrecedent),
+        BLANK()
+    )
+
+CA Année Courante =
+CALCULATE(
+    [CA Total],
+    DATESYTD(dim_date[date_id])
+)
+
+CA Année Précédente =
+CALCULATE(
+    [CA Total],
+    SAMEPERIODLASTYEAR(dim_date[date_id])
+)
+
+Evolution YoY % =
+DIVIDE(
+    [CA Année Courante] - [CA Année Précédente],
+    [CA Année Précédente]
+)
+
+
+// ── COMMANDES & PANIER ────────────────────────────────────────
+
+Nb Commandes =
+CALCULATE(
+    DISTINCTCOUNT(fact_sales[invoice_no]),
+    fact_sales[is_cancelled] = FALSE
+)
+
+Panier Moyen =
+DIVIDE([CA Total], [Nb Commandes])
+
+Panier Moyen Mois Précédent =
+CALCULATE(
+    [Panier Moyen],
+    PREVIOUSMONTH(dim_date[date_id])
+)
+
+
+// ── CLIENTS ───────────────────────────────────────────────────
+
+Nb Clients Uniques =
+CALCULATE(
+    DISTINCTCOUNT(fact_sales[customer_id]),
+    fact_sales[is_cancelled] = FALSE,
+    NOT ISBLANK(fact_sales[customer_id])
+)
+
+CA Moyen par Client =
+DIVIDE([CA Total], [Nb Clients Uniques])
+
+// Clients actifs dans les 90 derniers jours
+Clients Actifs 90j =
+CALCULATE(
+    DISTINCTCOUNT(fact_sales[customer_id]),
+    fact_sales[is_cancelled] = FALSE,
+    fact_sales[date_id] >= TODAY() - 90
+)
+
+
+// ── TOP PRODUITS ──────────────────────────────────────────────
+
+// Utiliser directement v_top_products pour le visuel "Top 10"
+// Filtre dans le visuel : revenue_rank <= 10
+
+Produits Vendus =
+CALCULATE(
+    DISTINCTCOUNT(fact_sales[product_id]),
+    fact_sales[is_cancelled] = FALSE,
+    fact_sales[quantity] > 0
+)
+
+
+// ── RFM ───────────────────────────────────────────────────────
+
+// Sur la table rfm_scores ou v_rfm_current
+Nb Champions =
+CALCULATE(
+    COUNTROWS(rfm_scores),
+    rfm_scores[rfm_segment] = "Champions"
+)
+
+Pct Champions =
+DIVIDE(
+    [Nb Champions],
+    COUNTROWS(rfm_scores)
+)
+
+
+// ── INDICATEURS COULEUR (pour KPI Cards) ──────────────────────
+
+Couleur Evolution MoM =
+IF([Evolution MoM %] >= 0, "#22C55E", "#EF4444")  -- vert / rouge
+
+Icone Evolution MoM =
+IF([Evolution MoM %] >= 0, "▲", "▼")
+
+
+// ── COHORTES ─────────────────────────────────────────────────
+// Ces KPIs viennent directement de la vue v_cohort_retention
+// Colonnes utiles pour la matrice Power BI :
+//   - cohort_month  → Lignes
+//   - month_number  → Colonnes
+//   - retention_rate → Valeurs (formaté en %)
+// Mise en forme conditionnelle : dégradé vert → rouge sur retention_rate
