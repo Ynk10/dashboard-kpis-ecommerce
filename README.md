@@ -65,8 +65,8 @@
 ### 2. Cloner le projet
 
 ```bash
-git clone https://github.com/VOTRE_USERNAME/06-dashboard-kpis-ecommerce.git
-cd 06-dashboard-kpis-ecommerce
+git clone https://github.com/tey_10/dashboard-kpis-ecommerce.git
+cd dashboard-kpis-ecommerce
 ```
 
 ### 3. Environnement virtuel Python
@@ -210,7 +210,7 @@ SELECT * FROM v_rfm_current LIMIT 10;
 
 ```dax
 // CA Total
-CA Total = SUM(fact_sales[total_amount])
+CA Total = SUM(fact_sales[quantity*unit_price])
 
 // CA Mois Précédent
 CA Mois Précédent = CALCULATE([CA Total], PREVIOUSMONTH(dim_date[date_id]))
@@ -273,8 +273,8 @@ dashboards/screenshots/
 
 ## 👤 Auteur
 
-**[Votre Nom]** — Data Analyst  
-[LinkedIn](#) · [Portfolio GitHub](#)
+**Yannick TCHALLA** — Data Analyst  
+[LinkedIn]([(https://www.linkedin.com/in/yannick-tchalla-a2b224227/)) · [Portfolio GitHub]([(https://github.com/Ynk10/))
 
 ---
 
