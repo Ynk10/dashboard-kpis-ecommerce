@@ -1,5 +1,5 @@
 -- ============================================================
--- E-Commerce KPI Dashboard - Requ?tes Analytiques
+-- E-Commerce KPI Dashboard - Requêtes Analytiques
 -- PostgreSQL
 -- ============================================================
 
